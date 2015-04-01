@@ -1,20 +1,13 @@
 package com.danwager.irc.twitch.config;
 
+import java.io.File;
+
 public class ConnectionConfig {
 
     private String nick;
     private String password;
     private String channel;
-
-    public ConnectionConfig() {
-        this("", "", "");
-    }
-
-    public ConnectionConfig(String nick, String password, String channel) {
-        this.nick = nick;
-        this.password = password;
-        this.channel = channel;
-    }
+    private File logLocation;
 
     public String getNick() {
         return nick;
@@ -38,5 +31,13 @@ public class ConnectionConfig {
 
     public void setChannel(String channel) {
         this.channel = channel.startsWith("#") ? channel : "#" + channel;
+    }
+
+    public File getLogLocation() {
+        return this.logLocation;
+    }
+
+    public void setLogLocation(String logLocation) {
+        this.logLocation = new File(logLocation);
     }
 }

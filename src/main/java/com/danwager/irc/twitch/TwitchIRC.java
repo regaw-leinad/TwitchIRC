@@ -13,6 +13,7 @@ import com.danwager.irc.twitch.message.handler.ServerMessageHandler;
 import com.danwager.irc.twitch.user.TwitchUserManager;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -28,28 +29,19 @@ public class TwitchIRC {
     public static final String TWITCH_IRC_HOST = "irc.twitch.tv";
     public static final int TWITCH_IRC_PORT = 6667;
 
-    private static final Logger LOGGER = Logger.getLogger("TwitchIRC");
-
     static {
-        try {
-            FileHandler fh = new FileHandler("TwitchIRC-" + System.currentTimeMillis() + ".log");
-            fh.setFormatter(new IRCLogFormatter());
-            /*ConsoleHandler ch = new ConsoleHandler();
-            ch.setFormatter(new IRCLogFormatter());*/
-            LOGGER.addHandler(fh);
-            /*LOGGER.addHandler(ch);*/
-            LOGGER.setUseParentHandlers(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     public static final String PONG = "PONG";
+
     public static final String PASS = "PASS";
     public static final String NICK = "NICK";
     public static final String JOIN = "JOIN";
     public static final String PART = "PART";
     public static final String PRIVMSG = "PRIVMSG";
+
+    private final Logger LOGGER = Logger.getLogger("TwitchIRC");
 
     private final ConnectionConfig config;
     private final ServerMessageFactory serverMessageFactory;
@@ -65,6 +57,19 @@ public class TwitchIRC {
 
     public TwitchIRC(final ConnectionConfig config) {
         this.config = config;
+
+        try {
+            File logLocation = new File(config.getLogLocation().getPath());
+            if (!logLocation.exists()) {
+                logLocation.mkdirs();
+            }
+            FileHandler fh = new FileHandler(logLocation.getPath() + File.separator + "TwitchIRC-" + System.currentTimeMillis() + ".log");
+            fh.setFormatter(new IRCLogFormatter());
+            LOGGER.addHandler(fh);
+            LOGGER.setUseParentHandlers(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         this.serverMessageFactory = new ServerMessageFactory();
         this.serverMessageHandlers = new TreeSet<>(new Comparator<ServerMessageHandler>() {
