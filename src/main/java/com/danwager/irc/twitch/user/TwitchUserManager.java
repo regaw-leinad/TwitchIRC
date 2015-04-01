@@ -7,7 +7,9 @@ import com.danwager.irc.twitch.message.general.PRIVMSGServerMessage;
 import com.danwager.irc.twitch.message.handler.HandlerPriority;
 import com.danwager.irc.twitch.message.handler.ServerMessageAdapter;
 import com.danwager.irc.twitch.message.jtv.USERCOLORMessage;
+import com.danwager.irc.twitch.util.Util;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,17 +66,6 @@ public class TwitchUserManager {
             final TwitchUser newUser = new TwitchUser(nick);
             this.users.put(nick, newUser);
             new Thread(new DisplayNameFetcher(newUser)).start();
-            /*Bukkit.getScheduler().runTaskAsynchronously(this.client.getPlugin(), new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        newUser.setDisplayName(Util.getJSONObjectFromUrl("https://api.twitch.tv/kraken/channels/" + newUser.getNick()).getString("display_name"));
-                    } catch (IOException e) {
-                        System.err.println("Error grabbing display_name for " + newUser.getNick());
-                    }
-                }
-            });
-            Bukkit.getPluginManager().callEvent(new TwitchUserJoinEvent(newUser));*/
         }
 
         return this.users.get(nick);
@@ -88,6 +79,27 @@ public class TwitchUserManager {
         System.out.println("TwitchUserManager");
         for (TwitchUser user : this.users.values()) {
             System.out.println(user);
+        }
+    }
+
+    private class DisplayNameFetcher implements Runnable {
+
+        private final TwitchUser user;
+
+        public DisplayNameFetcher(TwitchUser user) {
+            this.user = user;
+        }
+
+        @Override
+        public void run() {
+            if (!this.user.getNick().equalsIgnoreCase("jtv")) {
+                try {
+                    this.user.setDisplayName(Util.getJSONObjectFromUrl("https://api.twitch.tv/kraken/channels/" + this.user.getNick()).getString("display_name"));
+                } catch (IOException e) {
+                    System.err.println("Error grabbing display_name for " + this.user.getNick());
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
