@@ -48,5 +48,7 @@ public abstract class ServerMessageHandler {
 
     protected abstract void handle(WelcomeServerMessage message);
 
-    public abstract HandlerPriority getPriority();
+    public HandlerPriority getPriority() {
+        return HandlerPriority.NORMAL;
+    }
 }
