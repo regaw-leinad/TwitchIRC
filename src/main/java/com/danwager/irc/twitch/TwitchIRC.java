@@ -222,11 +222,9 @@ public class TwitchIRC {
     }
 
     public void sendRaw(String data) {
-        if (isStarted()) {
             this.writer.print(data.trim());
             this.writer.print("\r\n");
             this.writer.flush();
-        }
     }
 
     public void sendRaw(String command, String data) {

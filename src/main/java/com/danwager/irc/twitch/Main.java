@@ -11,6 +11,7 @@ public class Main {
         config.setNick("EximiusBot");
         config.setPassword("oauth:");
         config.setChannel("#regaw_leinad");
+        config.setLogLocation("irc_log");
 
         TwitchIRC irc = new TwitchIRC(config);
         irc.start();
