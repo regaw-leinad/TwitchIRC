@@ -75,6 +75,10 @@ public class TwitchUserManager {
         return this.users.get(nick);
     }
 
+    public void clear() {
+        this.users.clear();
+    }
+
     public void print() {
         System.out.println("TwitchUserManager");
         for (TwitchUser user : this.users.values()) {

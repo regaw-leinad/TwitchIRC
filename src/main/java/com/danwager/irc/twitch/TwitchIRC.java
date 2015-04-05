@@ -156,6 +156,7 @@ public class TwitchIRC {
         if (this.started) {
             System.out.println("Stopping IRC Client");
             forceDisconnect();
+            getUserManager().clear();
             this.started = false;
         }
     }
