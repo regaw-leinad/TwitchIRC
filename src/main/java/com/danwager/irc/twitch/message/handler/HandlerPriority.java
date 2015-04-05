@@ -10,7 +10,7 @@ public enum HandlerPriority {
 
     private final byte value;
 
-    private HandlerPriority(byte value) {
+    HandlerPriority(byte value) {
         this.value = value;
     }
 

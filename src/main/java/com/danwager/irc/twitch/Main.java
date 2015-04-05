@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         ConnectionConfig config = new ConnectionConfig();
-        config.setNick("EximiusBot");
+        config.setNick("RegawBot");
         config.setPassword("oauth:");
         config.setChannel("#regaw_leinad");
         config.setLogLocation("irc_log");
