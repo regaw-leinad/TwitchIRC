@@ -7,7 +7,6 @@ import com.danwager.irc.twitch.message.ServerMessageFactory;
 import com.danwager.irc.twitch.message.general.NoticeServerMessage;
 import com.danwager.irc.twitch.message.general.PINGServerMessage;
 import com.danwager.irc.twitch.message.general.WelcomeServerMessage;
-import com.danwager.irc.twitch.message.handler.HandlerPriority;
 import com.danwager.irc.twitch.message.handler.ServerMessageAdapter;
 import com.danwager.irc.twitch.message.handler.ServerMessageHandler;
 import com.danwager.irc.twitch.user.TwitchUserManager;
@@ -103,11 +102,6 @@ public class TwitchIRC {
                 System.out.println("Login successful!");
                 sendRaw("TWITCHCLIENT 3");
                 sendRaw(JOIN, config.getChannel());
-            }
-
-            @Override
-            public HandlerPriority getPriority() {
-                return HandlerPriority.NORMAL;
             }
         });
     }
