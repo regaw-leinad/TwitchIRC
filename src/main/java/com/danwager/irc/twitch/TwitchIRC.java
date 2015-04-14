@@ -28,12 +28,7 @@ public class TwitchIRC {
     public static final String TWITCH_IRC_HOST = "irc.twitch.tv";
     public static final int TWITCH_IRC_PORT = 6667;
 
-    static {
-
-    }
-
     public static final String PONG = "PONG";
-
     public static final String PASS = "PASS";
     public static final String NICK = "NICK";
     public static final String JOIN = "JOIN";
@@ -184,7 +179,9 @@ public class TwitchIRC {
 
     private void forceDisconnect() {
         try {
-            this.socket.close();
+            if (this.socket != null) {
+                this.socket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -222,9 +219,11 @@ public class TwitchIRC {
     }
 
     public void sendRaw(String data) {
+        if (this.writer != null) {
             this.writer.print(data.trim());
             this.writer.print("\r\n");
             this.writer.flush();
+        }
     }
 
     public void sendRaw(String command, String data) {

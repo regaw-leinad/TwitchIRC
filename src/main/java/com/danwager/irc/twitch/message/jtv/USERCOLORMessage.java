@@ -31,7 +31,7 @@ public class USERCOLORMessage extends JTVMessage {
 
     @Override
     protected boolean handles(String message) {
-        return message.startsWith("USERCOLOR");
+        return message.startsWith(getId());
     }
 
     @Override
