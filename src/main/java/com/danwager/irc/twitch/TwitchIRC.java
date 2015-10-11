@@ -35,7 +35,7 @@ public class TwitchIRC {
     public static final String PART = "PART";
     public static final String PRIVMSG = "PRIVMSG";
 
-    private final Logger LOGGER = Logger.getLogger("TwitchIRC");
+    private final Logger log = Logger.getLogger("TwitchIRC");
 
     private final ConnectionConfig config;
     private final ServerMessageFactory serverMessageFactory;
@@ -59,8 +59,8 @@ public class TwitchIRC {
             }
             FileHandler fh = new FileHandler(logLocation.getPath() + File.separator + "TwitchIRC-" + System.currentTimeMillis() + ".log");
             fh.setFormatter(new IRCLogFormatter());
-            LOGGER.addHandler(fh);
-            LOGGER.setUseParentHandlers(false);
+            log.addHandler(fh);
+            log.setUseParentHandlers(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,11 +80,13 @@ public class TwitchIRC {
         this.serverMessageHandlers.add(new ServerMessageAdapter() {
             @Override
             protected void handle(NoticeServerMessage message) {
-                if (message.getMessage().equals("Login unsuccessful")) {
-                    System.err.println("Invalid login credentials!");
-                    System.err.println("Wrong username or password?");
-                    stop();
+                if (!message.getMessage().equals("Login unsuccessful")) {
+                    return;
                 }
+
+                System.err.println("Invalid login credentials!");
+                System.err.println("Wrong username or password?");
+                stop();
             }
 
             @Override
@@ -106,45 +108,47 @@ public class TwitchIRC {
     }
 
     public void start() {
-        if (!this.started) {
-            System.out.println("Starting IRC Client");
-            try {
-                connect();
-                login();
-            } catch (Exception ex) {
-                System.err.println(ex.getMessage());
-                return;
-            }
-
-            Thread ioThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    boolean loop = true;
-
-                    while (loop && !Thread.currentThread().isInterrupted()) {
-                        try {
-                            String raw = reader.readLine();
-
-                            getLogger().info(raw);
-
-                            if (raw != null && !raw.isEmpty()) {
-                                ServerMessage message = getServerMessageFactory().create(raw);
-                                if (message != null) {
-                                    handleServerMessage(message);
-                                }
-                            }
-                        } catch (IOException ex) {
-                            loop = false;
-                        }
-                    }
-
-                    disconnect();
-                }
-            });
-            ioThread.setName("TwitchIRCClient-io");
-            ioThread.start();
-            this.started = true;
+        if (isStarted()) {
+            return;
         }
+
+        System.out.println("Starting IRC Client");
+        try {
+            connect();
+            login();
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+            return;
+        }
+
+        Thread ioThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean loop = true;
+
+                while (loop && !Thread.currentThread().isInterrupted()) {
+                    try {
+                        String raw = reader.readLine();
+
+                        getLogger().info(raw);
+
+                        if (raw != null && !raw.isEmpty()) {
+                            ServerMessage message = getServerMessageFactory().create(raw);
+                            if (message != null) {
+                                handleServerMessage(message);
+                            }
+                        }
+                    } catch (IOException ex) {
+                        loop = false;
+                    }
+                }
+
+                disconnect();
+            }
+        });
+        ioThread.setName("TwitchIRCClient-io");
+        ioThread.start();
+        this.started = true;
     }
 
     public void stop() {
@@ -157,17 +161,19 @@ public class TwitchIRC {
     }
 
     private void connect() throws IOException {
-        if (!this.connected) {
-            System.out.println("Connecting to Twitch");
-
-            this.socket = new Socket(TWITCH_IRC_HOST, TWITCH_IRC_PORT);
-            this.writer = new PrintWriter(this.socket.getOutputStream(), true);
-            this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-
-            this.connected = true;
-
-            System.out.println("Connected to Twitch");
+        if (this.connected) {
+            return;
         }
+
+        System.out.println("Connecting to Twitch");
+
+        this.socket = new Socket(TWITCH_IRC_HOST, TWITCH_IRC_PORT);
+        this.writer = new PrintWriter(this.socket.getOutputStream(), true);
+        this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+
+        this.connected = true;
+
+        System.out.println("Connected to Twitch");
     }
 
     private void login() {
@@ -179,9 +185,11 @@ public class TwitchIRC {
 
     private void forceDisconnect() {
         try {
-            if (this.socket != null) {
-                this.socket.close();
+            if (this.socket == null) {
+                return;
             }
+
+            this.socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,11 +227,13 @@ public class TwitchIRC {
     }
 
     public void sendRaw(String data) {
-        if (this.writer != null) {
-            this.writer.print(data.trim());
-            this.writer.print("\r\n");
-            this.writer.flush();
+        if (this.writer == null) {
+            return;
         }
+        
+        this.writer.print(data.trim());
+        this.writer.print("\r\n");
+        this.writer.flush();
     }
 
     public void sendRaw(String command, String data) {
@@ -249,7 +259,7 @@ public class TwitchIRC {
     }
 
     public Logger getLogger() {
-        return LOGGER;
+        return log;
     }
 
     public TwitchUserManager getUserManager() {
